@@ -1,0 +1,6 @@
+.venv/
+cropped_image/
+masks/
+original_image/
+outlines_png/
+outlines_svg/
