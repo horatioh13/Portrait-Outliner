@@ -1,4 +1,3 @@
-.gitignore
 .venv/
 cropped_image/
 masks/
