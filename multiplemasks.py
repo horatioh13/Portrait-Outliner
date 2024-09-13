@@ -431,42 +431,67 @@ def process_NUMPY_outlines(groups):
 
     return groups
 
-def trace_and_clean_path(path):
-    """Trace and clean the path by breaking at duplicate points."""
-    visited_points = set()
-    cleaned_path = Path()
-    
-    for line in path:
-        if isinstance(line, Line):
-            points = [line.start, line.end]
-            new_points = []
-            for point in points:
-                if point in visited_points:
-                    # Break the path at the duplicate point
-                    if new_points:
-                        cleaned_path.append(Line(new_points[0], new_points[-1]))
-                    new_points = [point]
-                else:
-                    visited_points.add(point)
-                    new_points.append(point)
-            if len(new_points) == 2:
-                cleaned_path.append(Line(new_points[0], new_points[1]))
-    
-    return cleaned_path
+
+import os
+import xml.etree.ElementTree as ET
+from math import sqrt
+
+def distance(p1, p2):
+    x1, y1 = map(float, p1.split(','))
+    x2, y2 = map(float, p2.split(','))
+    return sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
 
 def clean_svg_file(input_path, output_path):
     # Parse the SVG file
-    paths, attributes = svg2paths(input_path)
+    tree = ET.parse(input_path)
+    root = tree.getroot()
     
-    # Clean each path by tracing and breaking at duplicate points
-    cleaned_paths = []
-    for path in paths:
-        cleaned_path = trace_and_clean_path(path)
-        if cleaned_path:
-            cleaned_paths.append(cleaned_path)
+    # Namespace handling
+    ns = {'svg': 'http://www.w3.org/2000/svg'}
     
-    # Save the cleaned SVG file
-    wsvg(cleaned_paths, attributes=attributes, filename=output_path)
+    # Iterate through each polyline in the SVG
+    for polyline in root.findall('.//svg:polyline', ns):
+        points = polyline.get('points').strip().split()
+        unique_points = []
+        visited_points = set()
+        
+        for point in points:
+            if point not in visited_points:
+                visited_points.add(point)
+                unique_points.append(point)
+        
+        # Find the longest line segment
+        longest_segment_length = 0
+        longest_segment_index = 0
+        for i in range(len(unique_points) - 1):
+            segment_length = distance(unique_points[i], unique_points[i + 1])
+            if segment_length > longest_segment_length:
+                longest_segment_length = segment_length
+                longest_segment_index = i
+        
+        # Reverse points on both sides of the longest segment
+        points_before = unique_points[:longest_segment_index + 1]
+        points_after = unique_points[longest_segment_index + 1:]
+        
+        reversed_before = points_before[::-1] + points_after
+        reversed_after = points_before + points_after[::-1]
+        
+        # Calculate the new segment lengths
+        new_segment_length_before = distance(reversed_before[longest_segment_index], reversed_before[longest_segment_index + 1])
+        new_segment_length_after = distance(reversed_after[longest_segment_index], reversed_after[longest_segment_index + 1])
+        
+        # Keep the reversal that results in a shorter line segment
+        if new_segment_length_before < new_segment_length_after:
+            unique_points = reversed_before
+        else:
+            unique_points = reversed_after
+        
+        # Update the polyline points
+        polyline.set('points', ' '.join(unique_points))
+    
+    # Write the cleaned SVG to the output file
+    tree.write(output_path)
+
 
 
 if __name__ == '__main__':
