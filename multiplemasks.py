@@ -9,6 +9,7 @@ from glasses_detector import GlassesClassifier,GlassesSegmenter
 from face_crop_plus import Cropper
 from svgwrite import Drawing
 from skimage.morphology import skeletonize
+from svgpathtools import svg2paths, wsvg, Path, Line
 
 
 
@@ -430,6 +431,44 @@ def process_NUMPY_outlines(groups):
 
     return groups
 
+def trace_and_clean_path(path):
+    """Trace and clean the path by breaking at duplicate points."""
+    visited_points = set()
+    cleaned_path = Path()
+    
+    for line in path:
+        if isinstance(line, Line):
+            points = [line.start, line.end]
+            new_points = []
+            for point in points:
+                if point in visited_points:
+                    # Break the path at the duplicate point
+                    if new_points:
+                        cleaned_path.append(Line(new_points[0], new_points[-1]))
+                    new_points = [point]
+                else:
+                    visited_points.add(point)
+                    new_points.append(point)
+            if len(new_points) == 2:
+                cleaned_path.append(Line(new_points[0], new_points[1]))
+    
+    return cleaned_path
+
+def clean_svg_file(input_path, output_path):
+    # Parse the SVG file
+    paths, attributes = svg2paths(input_path)
+    
+    # Clean each path by tracing and breaking at duplicate points
+    cleaned_paths = []
+    for path in paths:
+        cleaned_path = trace_and_clean_path(path)
+        if cleaned_path:
+            cleaned_paths.append(cleaned_path)
+    
+    # Save the cleaned SVG file
+    wsvg(cleaned_paths, attributes=attributes, filename=output_path)
+
+
 if __name__ == '__main__':
 
     #cleardata()
@@ -446,10 +485,16 @@ if __name__ == '__main__':
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
+
     for item, key in zip(items, keys):
         if item[1] is not None:
             NUMPY_convert_to_SVG(item[1], 'outlines_svg/' + key + '_outline.svg')
 
+    for file in os.listdir('outlines_svg'):
+        if file.endswith('_outline.svg'):
+            input_svg_path = os.path.join('outlines_svg', file)
+            output_svg_path = os.path.join('outlines_svg', file.replace('_outline.svg', '_outline_cleaned.svg'))
+            clean_svg_file(input_svg_path, output_svg_path)
 
     
 
