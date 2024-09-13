@@ -8,7 +8,7 @@ from rembg import new_session, remove
 from glasses_detector import GlassesClassifier,GlassesSegmenter
 from face_crop_plus import Cropper
 from svgwrite import Drawing
-from svgwrite.container import Group
+from skimage.morphology import skeletonize
 
 
 
@@ -20,8 +20,8 @@ remove_model = 'rembg'
 
 apikey = 'dyqhCX5Zx5vRi9r1Hw3uVrky'
 
-#imagesource = 'laptopwebcam'
-imagesource = 'usbwebcam'
+imagesource = 'laptopwebcam'
+#imagesource = 'usbwebcam'
 #imagesource = 'thispersondoesnotexist'
 #imagesource = 'file'
 
@@ -129,27 +129,7 @@ def NUMPY_get_edges_from_mask(image):
     cv2.drawContours(contour_image, contours, -1, (255, 255, 255), 1)
     
     # Return the resulting image
-    return contour_image
-
-def NUMPY_process_bitmaps(image):
-
-    return image    
-
-def NUMPY_convert_to_SVG(image, output_path):
-    # Find contours
-    contours, _ = cv2.findContours(image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    
-    # Create an SVG drawing
-    height, width = image.shape
-    dwg = Drawing(output_path, profile='tiny', size=(width, height))
-    
-    # Draw contours
-    for contour in contours:
-        points = [(int(point[0][0]), int(point[0][1])) for point in contour]
-        dwg.add(dwg.polygon(points, fill='none', stroke='black', stroke_width=1))
-    
-    # Save the SVG file
-    dwg.save()    
+    return contour_image     
 
 def mask_dir_to_svgs():
     dir_path = 'masks'
@@ -226,6 +206,90 @@ def NUMPY_get_edges_from_mask2(image):
     result_image[result_image == 127] = 0 
 
     return result_image
+
+def NUMPY_convert_to_SVG(image, output_path):
+    
+    # Skeletonize the binary image to get the centerline
+    skeleton = skeletonize(image // 255)  # Convert to binary (0, 1) for skeletonize
+    
+    # Find contours on the skeletonized image
+    contours, _ = cv2.findContours(skeleton.astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    
+    # Create an SVG drawing
+    height, width = image.shape
+    dwg = Drawing(output_path, profile='tiny', size=(width, height))
+    
+    # Draw contours as polylines
+    for contour in contours:
+        points = [(int(point[0][0]), int(point[0][1])) for point in contour]
+        dwg.add(dwg.polyline(points, fill='none', stroke='black', stroke_width=1))
+    
+    # Save the SVG file
+    dwg.save()
+
+
+def NUMPY_convert_to_SVG2(image, output_path):
+    # Create an SVG drawing
+    height, width = image.shape
+    dwg = Drawing(output_path, profile='tiny', size=(width, height))
+    
+    # Create a set to keep track of visited pixels
+    visited = set()
+    
+    # Define the directions for adjacent pixels (no diagonals)
+    directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
+    
+    def is_valid(x, y):
+        return 0 <= x < height and 0 <= y < width and image[x, y] > 0
+    
+    def scan_directions(x, y):
+        non_visited_neighbors = []
+        for dx, dy in directions:
+            nx, ny = x + dx, y + dy
+            if is_valid(nx, ny) and (nx, ny) not in visited:
+                non_visited_neighbors.append((nx, ny))
+        return non_visited_neighbors
+
+    def find_polyline(x, y):
+        main_line = [(y, x)]  # Swap x and y here
+        visited.add((x, y))
+        non_visited_neighbors = scan_directions(x, y)
+        number_of_paths = len(non_visited_neighbors)
+
+        # Check if we are at a node
+        if number_of_paths > 1:
+            longest_path = []
+            for neighbor in non_visited_neighbors:
+                nx, ny = neighbor
+                polyline = find_polyline(nx, ny)
+                if len(polyline) > len(longest_path):
+                    longest_path = polyline
+        
+            if longest_path:
+                main_line.extend(longest_path)
+        
+        while number_of_paths == 1:
+            nx, ny = non_visited_neighbors[0]
+            main_line.append((ny, nx))  # Swap x and y here
+            visited.add((nx, ny))
+            non_visited_neighbors = scan_directions(nx, ny)
+            number_of_paths = len(non_visited_neighbors)
+        
+        return main_line
+            
+    # Loop through every pixel in the image
+    for x in range(height):
+        for y in range(width):
+            if image[x, y] > 0 and (x, y) not in visited:
+                polyline = find_polyline(x, y)
+                if len(polyline) > 1:
+                    dwg.add(dwg.polyline(polyline, fill='none', stroke='black', stroke_width=1))
+    
+    # Save the SVG file
+    dwg.save()
+
+
+
 
 ###### MAIN FUNCTIONS ######
 
@@ -368,19 +432,26 @@ def process_NUMPY_outlines(groups):
 
 if __name__ == '__main__':
 
-    cleardata()
-    get_image_from_source()
-    align_and_crop()
+    #cleardata()
+    #get_image_from_source()
+    #align_and_crop()
 
-    segment_face()
+    #segment_face()
     groups = mask_dir_to_NUMPY_arrays() 
     groups2 = process_NUMPY_outlines(groups)
     combine_and_plot_masks(groups2)
     items = groups2.items()
     keys = groups2.keys()
+    cv2.imshow('hair',groups2['hair'])
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
     for item, key in zip(items, keys):
         if item[1] is not None:
             NUMPY_convert_to_SVG(item[1], 'outlines_svg/' + key + '_outline.svg')
+
+
+    
 
     
 
