@@ -10,6 +10,8 @@ from face_crop_plus import Cropper
 from svgwrite import Drawing
 from skimage.morphology import skeletonize
 from svgpathtools import svg2paths, wsvg, Path, Line
+import xml.etree.ElementTree as ET
+from math import sqrt
 
 
 
@@ -207,27 +209,6 @@ def NUMPY_get_edges_from_mask2(image):
     result_image[result_image == 127] = 0 
 
     return result_image
-
-def NUMPY_convert_to_SVG(image, output_path):
-    
-    # Skeletonize the binary image to get the centerline
-    skeleton = skeletonize(image // 255)  # Convert to binary (0, 1) for skeletonize
-    
-    # Find contours on the skeletonized image
-    contours, _ = cv2.findContours(skeleton.astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    
-    # Create an SVG drawing
-    height, width = image.shape
-    dwg = Drawing(output_path, profile='tiny', size=(width, height))
-    
-    # Draw contours as polylines
-    for contour in contours:
-        points = [(int(point[0][0]), int(point[0][1])) for point in contour]
-        dwg.add(dwg.polyline(points, fill='none', stroke='black', stroke_width=1))
-    
-    # Save the SVG file
-    dwg.save()
-
 
 def NUMPY_convert_to_SVG2(image, output_path):
     # Create an SVG drawing
@@ -431,26 +412,38 @@ def process_NUMPY_outlines(groups):
 
     return groups
 
-
-import os
-import xml.etree.ElementTree as ET
-from math import sqrt
-
 def distance(p1, p2):
     x1, y1 = map(float, p1.split(','))
     x2, y2 = map(float, p2.split(','))
     return sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
 
-def clean_svg_file(input_path, output_path):
-    # Parse the SVG file
-    tree = ET.parse(input_path)
-    root = tree.getroot()
+def NUMPY_convert_to_SVG(image, output_path):
+    # Skeletonize the binary image to get the centerline
+    skeleton = skeletonize(image // 255)  # Convert to binary (0, 1) for skeletonize
+    
+    # Find contours on the skeletonized image
+    contours, _ = cv2.findContours(skeleton.astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    
+    # Create an SVG drawing
+    height, width = image.shape
+    dwg = Drawing(output_path, profile='tiny', size=(width, height))
+    
+    # Draw contours as polylines
+    for contour in contours:
+        points = [(int(point[0][0]), int(point[0][1])) for point in contour]
+        dwg.add(dwg.polyline(points, fill='none', stroke='black', stroke_width=1))
+    
+    # Convert the SVG drawing to an XML string
+    svg_string = dwg.tostring()
+    
+    # Parse the SVG string
+    root = ET.fromstring(svg_string)
     
     # Namespace handling
     ns = {'svg': 'http://www.w3.org/2000/svg'}
     
     # Iterate through each polyline in the SVG
-    for polyline in root.findall('.//svg:polyline', ns):
+    for polyline in root.findall('.//{http://www.w3.org/2000/svg}polyline'):
         points = polyline.get('points').strip().split()
         unique_points = []
         visited_points = set()
@@ -489,8 +482,12 @@ def clean_svg_file(input_path, output_path):
         # Update the polyline points
         polyline.set('points', ' '.join(unique_points))
     
-    # Write the cleaned SVG to the output file
-    tree.write(output_path)
+    # Convert the cleaned XML tree back to a string
+    cleaned_svg_string = ET.tostring(root, encoding='unicode')
+    
+    # Save the cleaned SVG string to the output file
+    with open(output_path, 'w') as f:
+        f.write(cleaned_svg_string)
 
 
 
@@ -515,11 +512,6 @@ if __name__ == '__main__':
         if item[1] is not None:
             NUMPY_convert_to_SVG(item[1], 'outlines_svg/' + key + '_outline.svg')
 
-    for file in os.listdir('outlines_svg'):
-        if file.endswith('_outline.svg'):
-            input_svg_path = os.path.join('outlines_svg', file)
-            output_svg_path = os.path.join('outlines_svg', file.replace('_outline.svg', '_outline_cleaned.svg'))
-            clean_svg_file(input_svg_path, output_svg_path)
 
     
 
