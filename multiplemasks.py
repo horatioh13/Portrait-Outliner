@@ -12,8 +12,7 @@ from skimage.morphology import skeletonize
 from svgpathtools import svg2paths, wsvg, Path, Line
 import xml.etree.ElementTree as ET
 from math import sqrt
-
-
+from rdp import rdp
 
 ############################################
 # Configuration
@@ -474,13 +473,14 @@ def NUMPY_convert_to_SVG(image, output_path):
         new_segment_length_after = distance(reversed_after[longest_segment_index], reversed_after[longest_segment_index + 1])
         
         # Keep the reversal that results in a shorter line segment
-        if new_segment_length_before < new_segment_length_after:
+        if new_segment_length_before < new_segment_length_after and new_segment_length_before < longest_segment_length:
             unique_points = reversed_before
-        else:
+        if new_segment_length_after < new_segment_length_before and new_segment_length_after < longest_segment_length:
             unique_points = reversed_after
-        
-        # Update the polyline points
-        polyline.set('points', ' '.join(unique_points))
+
+        if unique_points:
+            # Update the polyline points
+            polyline.set('points', ' '.join(unique_points))
     
     # Convert the cleaned XML tree back to a string
     cleaned_svg_string = ET.tostring(root, encoding='unicode')
@@ -490,14 +490,13 @@ def NUMPY_convert_to_SVG(image, output_path):
         f.write(cleaned_svg_string)
 
 
-
 if __name__ == '__main__':
 
-    #cleardata()
-    #get_image_from_source()
-    #align_and_crop()
+    cleardata()
+    get_image_from_source()
+    align_and_crop()
 
-    #segment_face()
+    segment_face()
     groups = mask_dir_to_NUMPY_arrays() 
     groups2 = process_NUMPY_outlines(groups)
     combine_and_plot_masks(groups2)
