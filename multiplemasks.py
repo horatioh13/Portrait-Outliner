@@ -339,7 +339,7 @@ def get_image_from_source():
         image1 = 'original_image/image1.png'
 
 def align_and_crop():
-    cropper = Cropper(strategy="largest")
+    cropper = Cropper(strategy="largest",face_factor=.7)
     cropper.process_dir(input_dir='original_image',output_dir='cropped_image')
 
 def segment_face():
@@ -441,6 +441,16 @@ def NUMPY_convert_to_SVG(image, output_path):
     # Namespace handling
     ns = {'svg': 'http://www.w3.org/2000/svg'}
     
+
+
+    def scale_point(point, scale_factor):
+        x, y = map(float, point.split(','))
+        x = int(x * scale_factor + 20)
+        y = int(y * scale_factor + 20)
+        return f'{x},{y}'
+
+
+
     # Iterate through each polyline in the SVG
     for polyline in root.findall('.//{http://www.w3.org/2000/svg}polyline'):
         points = polyline.get('points').strip().split()
@@ -448,6 +458,8 @@ def NUMPY_convert_to_SVG(image, output_path):
         visited_points = set()
         
         for point in points:
+            # Assuming point is a sequence (e.g., list or tuple) of numerical values
+            point = scale_point(point, 150 / 256)
             if point not in visited_points:
                 visited_points.add(point)
                 unique_points.append(point)
@@ -460,27 +472,27 @@ def NUMPY_convert_to_SVG(image, output_path):
             if segment_length > longest_segment_length:
                 longest_segment_length = segment_length
                 longest_segment_index = i
-        
-        # Reverse points on both sides of the longest segment
-        points_before = unique_points[:longest_segment_index + 1]
-        points_after = unique_points[longest_segment_index + 1:]
-        
-        reversed_before = points_before[::-1] + points_after
-        reversed_after = points_before + points_after[::-1]
-        
-        # Calculate the new segment lengths
-        new_segment_length_before = distance(reversed_before[longest_segment_index], reversed_before[longest_segment_index + 1])
-        new_segment_length_after = distance(reversed_after[longest_segment_index], reversed_after[longest_segment_index + 1])
-        
-        # Keep the reversal that results in a shorter line segment
-        if new_segment_length_before < new_segment_length_after and new_segment_length_before < longest_segment_length:
-            unique_points = reversed_before
-        if new_segment_length_after < new_segment_length_before and new_segment_length_after < longest_segment_length:
-            unique_points = reversed_after
+        if longest_segment_index != 0:
+            # Reverse points on both sides of the longest segment
+            points_before = unique_points[:longest_segment_index + 1]
+            points_after = unique_points[longest_segment_index + 1:]
 
-        if unique_points:
-            # Update the polyline points
-            polyline.set('points', ' '.join(unique_points))
+            reversed_before = points_before[::-1] + points_after
+            reversed_after = points_before + points_after[::-1]
+
+            # Calculate the new segment lengths
+            new_segment_length_before = distance(reversed_before[longest_segment_index], reversed_before[longest_segment_index + 1])
+            new_segment_length_after = distance(reversed_after[longest_segment_index], reversed_after[longest_segment_index + 1])
+
+            # Keep the reversal that results in a shorter line segment
+            if new_segment_length_before < new_segment_length_after and new_segment_length_before < longest_segment_length:
+                unique_points = reversed_before
+            if new_segment_length_after < new_segment_length_before and new_segment_length_after < longest_segment_length:
+                unique_points = reversed_after
+
+            if unique_points:
+                # Update the polyline points
+                polyline.set('points', ' '.join(unique_points))
     
     # Convert the cleaned XML tree back to a string
     cleaned_svg_string = ET.tostring(root, encoding='unicode')
