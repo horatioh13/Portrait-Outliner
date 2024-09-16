@@ -22,9 +22,9 @@ remove_model = 'rembg'
 
 apikey = 'dyqhCX5Zx5vRi9r1Hw3uVrky'
 
-imagesource = 'laptopwebcam'
+#imagesource = 'laptopwebcam'
 #imagesource = 'usbwebcam'
-#imagesource = 'thispersondoesnotexist'
+imagesource = 'thispersondoesnotexist'
 #imagesource = 'file'
 
 #edgemode = 'canny'
@@ -409,6 +409,13 @@ def process_NUMPY_outlines(groups):
     groups['mouth'] = dilate_and_subtract(groups['mouth'], groups['upper lip'])
     groups['mouth'] = dilate_and_subtract(groups['mouth'], groups['lower lip'])
 
+    #subtracting ears from clothes
+    groups['clothes'] = dilate_and_subtract(groups['clothes'], groups['ears'])
+
+    #subtracting earings from ears
+    groups['ears'] = dilate_and_subtract(groups['ears'], groups['earings'])
+
+
     return groups
 
 def distance(p1, p2):
@@ -429,28 +436,52 @@ def NUMPY_convert_to_SVG(image, output_path):
     
     # Draw contours as polylines
     for contour in contours:
-        points = [(int(point[0][0]), int(point[0][1])) for point in contour]
+        points = []
+        for point in contour:
+            x = int(point[0][0])
+            y = int(point[0][1])
+            points.append((x, y))
         dwg.add(dwg.polyline(points, fill='none', stroke='black', stroke_width=1))
     
     # Convert the SVG drawing to an XML string
     svg_string = dwg.tostring()
     
     # Parse the SVG string
-    root = ET.fromstring(svg_string)
-    
-    # Namespace handling
-    ns = {'svg': 'http://www.w3.org/2000/svg'}
-    
-
+    root = ET.fromstring(svg_string)    
 
     def scale_point(point, scale_factor):
         x, y = map(float, point.split(','))
-        x = int(x * scale_factor + 20)
-        y = int(y * scale_factor + 20)
+        x = int(x * scale_factor)
+        y = int(y * scale_factor)
         return f'{x},{y}'
-
-
-
+    
+    def find_longest_line_segment(points):
+        longest_segment_length = 0
+        longest_segment_index = 0
+        for i in range(len(points) - 1):
+            segment_length = distance(points[i], points[i + 1])
+            if segment_length > longest_segment_length:
+                longest_segment_length = segment_length
+                longest_segment_index = i
+        return longest_segment_index, longest_segment_length
+    
+    def reorder_paths(points, longest_segment_index, longest_segment_length):
+        if longest_segment_index != 0:
+            points_before = points[:longest_segment_index + 1]
+            points_after = points[longest_segment_index + 1:]
+    
+            reversed_before = points_before[::-1] + points_after
+            reversed_after = points_before + points_after[::-1]
+    
+            new_segment_length_before = distance(reversed_before[longest_segment_index], reversed_before[longest_segment_index + 1])
+            new_segment_length_after = distance(reversed_after[longest_segment_index], reversed_after[longest_segment_index + 1])
+    
+            if new_segment_length_before < new_segment_length_after and new_segment_length_before < longest_segment_length:
+                return reversed_before
+            if new_segment_length_after < new_segment_length_before and new_segment_length_after < longest_segment_length:
+                return reversed_after
+        return points
+    
     # Iterate through each polyline in the SVG
     for polyline in root.findall('.//{http://www.w3.org/2000/svg}polyline'):
         points = polyline.get('points').strip().split()
@@ -458,45 +489,69 @@ def NUMPY_convert_to_SVG(image, output_path):
         visited_points = set()
         
         for point in points:
-            # Assuming point is a sequence (e.g., list or tuple) of numerical values
             point = scale_point(point, 150 / 256)
             if point not in visited_points:
                 visited_points.add(point)
                 unique_points.append(point)
         
-        # Find the longest line segment
-        longest_segment_length = 0
-        longest_segment_index = 0
-        for i in range(len(unique_points) - 1):
-            segment_length = distance(unique_points[i], unique_points[i + 1])
-            if segment_length > longest_segment_length:
-                longest_segment_length = segment_length
-                longest_segment_index = i
-        if longest_segment_index != 0:
-            # Reverse points on both sides of the longest segment
-            points_before = unique_points[:longest_segment_index + 1]
-            points_after = unique_points[longest_segment_index + 1:]
-
-            reversed_before = points_before[::-1] + points_after
-            reversed_after = points_before + points_after[::-1]
-
-            # Calculate the new segment lengths
-            new_segment_length_before = distance(reversed_before[longest_segment_index], reversed_before[longest_segment_index + 1])
-            new_segment_length_after = distance(reversed_after[longest_segment_index], reversed_after[longest_segment_index + 1])
-
-            # Keep the reversal that results in a shorter line segment
-            if new_segment_length_before < new_segment_length_after and new_segment_length_before < longest_segment_length:
-                unique_points = reversed_before
-            if new_segment_length_after < new_segment_length_before and new_segment_length_after < longest_segment_length:
-                unique_points = reversed_after
-
-            if unique_points:
-                # Update the polyline points
-                polyline.set('points', ' '.join(unique_points))
+        longest_segment_index, longest_segment_length = find_longest_line_segment(unique_points)
+        unique_points = reorder_paths(unique_points, longest_segment_index, longest_segment_length)
+    
+        if unique_points:
+            polyline.set('points', ' '.join(unique_points))
     
     # Convert the cleaned XML tree back to a string
     cleaned_svg_string = ET.tostring(root, encoding='unicode')
+
+    # Save the cleaned SVG string to the output file
+    with open(output_path, 'w') as f:
+        f.write(cleaned_svg_string)
+
+def closed_contor_calculation(contour):
+    contor_status = False
+    area = cv2.contourArea(contour)
+    if area > 0:
+        contor_status = True
+
+    return contor_status
+
+def NUMPY_convert_to_SVG2(image, output_path):
+    # Skeletonize the binary image to get the centerline
+    skeleton = skeletonize(image // 255)  # Convert to binary (0, 1) for skeletonize
     
+    # Convert skeleton to 8-bit single-channel image for display
+    skeleton_display = (skeleton * 255).astype(np.uint8)
+
+    # Find contours on the skeletonized image
+    contours, _ = cv2.findContours(skeleton.astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    # Create an SVG drawing
+    height, width = image.shape
+    dwg = Drawing(output_path, profile='tiny', size=(width, height))
+    
+    # Draw contours as polylines
+    for contour in contours:
+        points = []
+        for point in contour:
+            x = int(point[0][0])
+            y = int(point[0][1])
+            points.append((x, y))
+        
+        if closed_contor_calculation(contour) == True:
+            points.append(points[0])
+
+        dwg.add(dwg.polyline(points, fill='none', stroke='black', stroke_width=1))
+    
+    # Convert the SVG drawing to an XML string
+    svg_string = dwg.tostring()
+    
+    # Parse the SVG string
+    root = ET.fromstring(svg_string)    
+
+
+    # Convert the cleaned XML tree back to a string
+    cleaned_svg_string = ET.tostring(root, encoding='unicode')
+
     # Save the cleaned SVG string to the output file
     with open(output_path, 'w') as f:
         f.write(cleaned_svg_string)
@@ -521,7 +576,7 @@ if __name__ == '__main__':
 
     for item, key in zip(items, keys):
         if item[1] is not None:
-            NUMPY_convert_to_SVG(item[1], 'outlines_svg/' + key + '_outline.svg')
+            NUMPY_convert_to_SVG2(item[1], 'outlines_svg/' + key + '_outline.svg')
 
 
     

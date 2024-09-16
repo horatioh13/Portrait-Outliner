@@ -76,7 +76,7 @@ if __name__ == '__main__':
     input_dir = 'outlines_svg'
     combined_svg_path = 'combined_output.svg'
     combine_svgs(input_dir, combined_svg_path)
-    output_path = '/media/horatio/34FC-DFCF/output51.gcode'
+    output_path = 'output51.gcode'
     svg_path = 'combined_output.svg'
     svg_to_gcode(svg_path, output_path)
     
