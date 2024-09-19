@@ -272,41 +272,25 @@ def NUMPY_convert_to_SVG2(image, output_path):
     # Save the SVG file
     dwg.save()
 
-
-
-
 ###### MAIN FUNCTIONS ######
-
-
 def cleardata():
-    dir_path = 'original_image'
-    for file in os.listdir(dir_path):
-        if imagesource == 'file':
-            continue
-        
-        file_path = os.path.join(dir_path, file)
-        os.remove(file_path)
+    # Directories to clear
+    directories = ['original_image', 'cropped_image', 'masks', 'outlines_svg']
 
-    dir_path = 'cropped_image'
-    for file in os.listdir(dir_path):
-        file_path = os.path.join(dir_path, file)
-        os.remove(file_path)
-    
-    dir_path = 'masks'
-    # Check if the directory exists
-    if os.path.exists(dir_path):
-        # Remove everything in the directory
-        for file in os.listdir(dir_path):
-            file_path = os.path.join(dir_path, file)
-            if os.path.isfile(file_path) or os.path.islink(file_path):
-                os.remove(file_path)
-            elif os.path.isdir(file_path):
-                shutil.rmtree(file_path)
+    if imagesource == 'file':
+        directories.remove('original_image')
 
-    dir_path = 'outlines_svg'
-    for file in os.listdir(dir_path):
-        file_path = os.path.join(dir_path, file)
-        os.remove(file_path)
+    for dir_path in directories:
+        if os.path.exists(dir_path):
+            for file in os.listdir(dir_path):
+                if file == '.gitignore':
+                    continue
+                
+                file_path = os.path.join(dir_path, file)
+                if os.path.isfile(file_path) or os.path.islink(file_path):
+                    os.remove(file_path)
+                elif os.path.isdir(file_path):
+                    shutil.rmtree(file_path)
 
 def get_image_from_source():
     if imagesource == 'thispersondoesnotexist':
@@ -564,7 +548,7 @@ def add_features_from_svg():
     
         eyes = []
         paths = parse_svg(svg_path='outlines_svg/eyes_outline.svg')
-        print(paths)
+        #print(paths)
 
         for path in paths:
             # Convert the list of coordinates to a numpy array
@@ -610,9 +594,15 @@ def add_features_from_svg():
         # Save the new SVG file
         dwg.save()
     
-
+def init_file_structure():
+    directories = ['original_image', 'cropped_image', 'masks', 'outlines_svg']
+    for dir_path in directories:
+        if not os.path.exists(dir_path):
+            os.makedirs(dir_path)
 
 if __name__ == '__main__':
+
+    init_file_structure()
 
     cleardata()
     get_image_from_source()
