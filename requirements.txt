@@ -63,6 +63,7 @@ pillow==10.4.0
 pipreqs==0.5.0
 platformdirs==4.3.2
 pooch==1.8.2
+Printrun==2.1.0
 prompt_toolkit==3.0.47
 protobuf==5.28.0
 ptyprocess==0.7.0
@@ -71,16 +72,19 @@ Pygments==2.18.0
 PyMatting==1.1.12
 python-dateutil==2.9.0.post0
 pyzmq==26.2.0
+rdp==0.8
 referencing==0.35.1
 rembg==2.0.59
 requests==2.32.3
 rpds-py==0.20.0
 scikit-image==0.24.0
 scipy==1.14.1
-setuptools==74.1.2
+setuptools==75.1.0
+shapely==2.0.6
 six==1.16.0
 soupsieve==2.6
 stack-data==0.6.3
+svgpathtools==1.6.1
 svgwrite==1.4.3
 sympy==1.13.2
 tifffile==2024.8.30
@@ -96,4 +100,5 @@ Unidecode==1.3.8
 urllib3==2.2.2
 wcwidth==0.2.13
 webencodings==0.5.1
+wheel==0.44.0
 yarg==0.1.9

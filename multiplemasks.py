@@ -13,6 +13,9 @@ from svgpathtools import svg2paths, wsvg, Path, Line
 import xml.etree.ElementTree as ET
 from math import sqrt
 from rdp import rdp
+import math
+
+from svgs_to_gcode import parse_svg
 
 ############################################
 # Configuration
@@ -556,6 +559,58 @@ def NUMPY_convert_to_SVG2(image, output_path):
     with open(output_path, 'w') as f:
         f.write(cleaned_svg_string)
 
+def add_features_from_svg():
+    if os.path.exists('outlines_svg/eyes_outline.svg') == True:
+    
+        eyes = []
+        paths = parse_svg(svg_path='outlines_svg/eyes_outline.svg')
+        print(paths)
+
+        for path in paths:
+            # Convert the list of coordinates to a numpy array
+            contour = np.array(path, dtype=np.int32)
+
+            # Calculate the bounding box of the contour
+            x, y, w, h = cv2.boundingRect(contour)
+
+            # Calculate the center of the bounding box
+            center_x = x + w // 2
+            center_y = y + h // 2
+
+            # Append the center, height, and width to the list
+            eyes.append([(center_x, center_y), h, w])
+
+        # Create a new SVG drawing
+        dwg = Drawing('outlines_svg/eyeballs.svg', profile='tiny')
+
+        def approximate_circle(center, radius, num_points=36):
+            cx, cy = center
+            points = [
+                (cx + radius * math.cos(2 * math.pi * i / num_points),
+                 cy + radius * math.sin(2 * math.pi * i / num_points))
+                for i in range(num_points)
+            ]
+            points.append(points[0])  # Close the circle
+            return points
+
+        average_iris_radius = sum(eye[1] for eye in eyes) // len(eyes) // 2
+        pupil_radius = average_iris_radius // 3
+        # Add the pupils and iris to the new SVG
+        for eye in eyes:
+            center = eye[0]
+
+            # Draw the iris as a polyline
+            iris_points = approximate_circle(center, average_iris_radius)
+            dwg.add(dwg.polyline(points=iris_points, fill='none', stroke='black', stroke_width=1))
+
+            # Draw the pupil as a polyline
+            pupil_points = approximate_circle(center, pupil_radius)
+            dwg.add(dwg.polyline(points=pupil_points, fill='none',stroke='black', stroke_width=1))
+
+        # Save the new SVG file
+        dwg.save()
+    
+
 
 if __name__ == '__main__':
 
@@ -573,10 +628,11 @@ if __name__ == '__main__':
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
-
     for item, key in zip(items, keys):
         if item[1] is not None:
             NUMPY_convert_to_SVG2(item[1], 'outlines_svg/' + key + '_outline.svg')
+
+    add_features_from_svg()
 
 
     
