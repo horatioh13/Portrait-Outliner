@@ -114,10 +114,10 @@ def create_outlines():
     for file in os.listdir(dir_path):
         file_path = os.path.join(dir_path, file)
         if file_path.endswith('_mask'):
-            image_path = file_path + '/image1.png'
+            image_path = os.path.join(file_path, 'image1.png')
             name = file_path[6:-5]
             print(name)
-            new_path = 'outlines_png/' + name + '_outline.png'
+            new_path = os.path.join('outlines_png', name + '_outline.png')
             get_edges_from_mask(image_path, new_path)
 
 
@@ -141,11 +141,11 @@ def mask_dir_to_svgs():
     for file in os.listdir(dir_path):
         file_path = os.path.join(dir_path, file)
         if file_path.endswith('_mask'):
-            image_path = file_path + '/image1.png'
+            image_path = os.path.join(file_path, 'image1.png')
             name = file_path[6:-5]
             mask = read_PNG_mask(image_path)
             #mask = NUMPY_process_bitmaps(mask)
-            svg_path = 'outlines_svg/' + name + '_outline.svg'
+            svg_path = os.path.join('outlines_svg', name + '_outline.svg')
             NUMPY_convert_to_SVG(mask, svg_path)
 
 def combine_and_plot_masks(masks_dict):
@@ -300,7 +300,7 @@ def get_image_from_source():
             response.raise_for_status()  # Raise an exception for HTTP errors
             image_bytes = io.BytesIO(response.content)
             image1 = cv2.imdecode(np.frombuffer(image_bytes.read(), np.uint8), cv2.IMREAD_COLOR)
-            cv2.imwrite('original_image/image1.png', image1)
+            cv2.imwrite(os.path.join('original_image', 'image1.png'), image1)
         except requests.RequestException as e:
             print(f'Failed to download the image: {e}')
 
@@ -544,10 +544,10 @@ def NUMPY_convert_to_SVG2(image, output_path):
         f.write(cleaned_svg_string)
 
 def add_features_from_svg():
-    if os.path.exists('outlines_svg/eyes_outline.svg') == True:
+    if os.path.isfile(os.path.join('outlines_svg', 'eyes_outline.svg')):
     
         eyes = []
-        paths = parse_svg(svg_path='outlines_svg/eyes_outline.svg')
+        paths = parse_svg(svg_path=os.path.join('outlines_svg', 'eyes_outline.svg'))
         #print(paths)
 
         for path in paths:
@@ -565,7 +565,8 @@ def add_features_from_svg():
             eyes.append([(center_x, center_y), h, w])
 
         # Create a new SVG drawing
-        dwg = Drawing('outlines_svg/eyeballs.svg', profile='tiny')
+        output_dir = os.path.join('outlines_svg', 'eyeballs.svg')
+        dwg = Drawing(output_dir, profile='tiny')
 
         def approximate_circle(center, radius, num_points=36):
             cx, cy = center
@@ -589,7 +590,7 @@ def add_features_from_svg():
 
             # Draw the pupil as a polyline
             pupil_points = approximate_circle(center, pupil_radius)
-            dwg.add(dwg.polyline(points=pupil_points, fill='none',stroke='black', stroke_width=1))
+            dwg.add(dwg.polyline(points=pupil_points, fill='none',troke='black', stroke_width=1))
 
         # Save the new SVG file
         dwg.save()
@@ -620,7 +621,8 @@ if __name__ == '__main__':
 
     for item, key in zip(items, keys):
         if item[1] is not None:
-            NUMPY_convert_to_SVG2(item[1], 'outlines_svg/' + key + '_outline.svg')
+            output_path = os.path.join('outlines_svg', f'{key}_outline.svg')
+            NUMPY_convert_to_SVG2(item[1], output_path)
 
     add_features_from_svg()
 
