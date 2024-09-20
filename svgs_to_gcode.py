@@ -1,5 +1,14 @@
 import os
 import xml.etree.ElementTree as ET
+import svgutils.transform as sg
+from svgutils.compose import Unit
+
+pendownzheight = 12.7
+offset = 4
+
+
+penupzheight = pendownzheight + offset
+
 
 def parse_svg(svg_path):
     tree = ET.parse(svg_path)
@@ -19,7 +28,7 @@ def generate_gcode(paths):
     gcode.append("G21 ; Set units to millimeters")
     gcode.append("G90 ; Use absolute positioning")
     gcode.append("G28 ; Home all axes")
-    gcode.append("G0 Z15 F3000 ; Lift pen")
+    gcode.append(f"G0 Z{penupzheight} F3000 ; Lift pen")
 
     for path in paths:
         if not path:
@@ -29,7 +38,7 @@ def generate_gcode(paths):
         start_x, start_y = path[0]
 
         gcode.append(f"G0 X{start_x} Y{start_y} F3000 ; Move to start of path")
-        gcode.append("G0 Z10.4 F3000 ; Lower pen to start drawing")
+        gcode.append(f"G0 Z{pendownzheight} F3000 ; Lower pen to start drawing")
 
         # Draw the path
         for x, y in path[1:]:
@@ -37,19 +46,30 @@ def generate_gcode(paths):
         
         # Lift the pen after drawing the path
         gcode.append('G91')
-        gcode.append('G0 Z4.6 F3000 ; Lift pen')
+        gcode.append(f'G0 Z{offset} F3000 ; Lift pen')
         gcode.append('G90')
         
     # Ensure the pen is lifted before moving to the home position
-    gcode.append("G0 Z15 F3000 ; Lift pen")
+    gcode.append(f"G0 Z{penupzheight} F3000 ; Lift pen")
     gcode.append("G0 X0 Y0 F3000 ; Move to home position")
     gcode.append("M84 ; Disable motors")
 
     return "\n".join(gcode)
 
+def scale_paths(paths):
+    scaled_paths = []
+    scaling_factor = 150/256
+    nudgexy = 42.5
+    for path in paths:
+        scaled_path = [(x *scaling_factor + nudgexy, y * scaling_factor + nudgexy) for x, y in path]
+        scaled_paths.append(scaled_path)
+    
+    return scaled_paths
+
 def svg_to_gcode(svg_path, output_path):
     paths = parse_svg(svg_path)
-    gcode = generate_gcode(paths)
+    scaled_paths = scale_paths(paths)
+    gcode = generate_gcode(scaled_paths)
     
     with open(output_path, 'w') as f:
         f.write(gcode)
@@ -70,14 +90,7 @@ def combine_svgs(input_dir, output_svg_path):
     tree = ET.ElementTree(combined_svg)
     tree.write(output_svg_path)
 
-
 # Example usage
 if __name__ == '__main__':
-    input_dir = 'outlines_svg'
-    combined_svg_path = 'combined_output.svg'
-    combine_svgs(input_dir, combined_svg_path)
-    output_path = 'output51.gcode'
-    svg_path = 'combined_output.svg'
-    svg_to_gcode(svg_path, output_path)
-    
-  
+    combine_svgs('outlines_svg', 'combined_output.svg')
+    svg_to_gcode('combined_output.svg','output51.gcode')

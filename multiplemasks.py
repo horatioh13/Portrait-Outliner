@@ -26,8 +26,8 @@ remove_model = 'rembg'
 apikey = 'dyqhCX5Zx5vRi9r1Hw3uVrky'
 
 #imagesource = 'laptopwebcam'
-#imagesource = 'usbwebcam'
-imagesource = 'thispersondoesnotexist'
+imagesource = 'usbwebcam'
+#imagesource = 'thispersondoesnotexist'
 #imagesource = 'file'
 
 #edgemode = 'canny'
@@ -182,7 +182,6 @@ def dilate_and_subtract(target, source):
     else:
         return target
 
-
 #secondary functions
 
 def read_PNG_mask(image_path):
@@ -314,7 +313,7 @@ def get_image_from_source():
             print('Failed to capture image from webcam.')
 
     elif imagesource == 'usbwebcam':
-        cap = cv2.VideoCapture(2)
+        cap = cv2.VideoCapture(0)
         ret, frame = cap.read()
         cap.release()
         if ret:
@@ -519,10 +518,13 @@ def NUMPY_convert_to_SVG2(image, output_path):
     # Draw contours as polylines
     for contour in contours:
         points = []
+        visited_points = set()
         for point in contour:
             x = int(point[0][0])
             y = int(point[0][1])
+            #if (x, y) not in visited_points:
             points.append((x, y))
+            visited_points.add((x, y))
         
         if closed_contor_calculation(contour) == True:
             points.append(points[0])
@@ -590,7 +592,7 @@ def add_features_from_svg():
 
             # Draw the pupil as a polyline
             pupil_points = approximate_circle(center, pupil_radius)
-            dwg.add(dwg.polyline(points=pupil_points, fill='none',troke='black', stroke_width=1))
+            dwg.add(dwg.polyline(points=pupil_points, fill='none', stroke='black', stroke_width=1))
 
         # Save the new SVG file
         dwg.save()
@@ -624,7 +626,7 @@ if __name__ == '__main__':
             output_path = os.path.join('outlines_svg', f'{key}_outline.svg')
             NUMPY_convert_to_SVG2(item[1], output_path)
 
-    add_features_from_svg()
+    #add_features_from_svg()
 
 
     
