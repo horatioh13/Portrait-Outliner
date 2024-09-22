@@ -3,3 +3,4 @@ outlines_svg/
 original_image/
 masks/
 cropped_image/
+__pycache__/

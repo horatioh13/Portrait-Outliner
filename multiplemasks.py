@@ -25,8 +25,8 @@ remove_model = 'rembg'
 
 apikey = 'dyqhCX5Zx5vRi9r1Hw3uVrky'
 
-#imagesource = 'laptopwebcam'
-imagesource = 'usbwebcam'
+imagesource = 'laptopwebcam'
+#imagesource = 'usbwebcam'
 #imagesource = 'thispersondoesnotexist'
 #imagesource = 'file'
 
@@ -211,65 +211,6 @@ def NUMPY_get_edges_from_mask2(image):
 
     return result_image
 
-def NUMPY_convert_to_SVG2(image, output_path):
-    # Create an SVG drawing
-    height, width = image.shape
-    dwg = Drawing(output_path, profile='tiny', size=(width, height))
-    
-    # Create a set to keep track of visited pixels
-    visited = set()
-    
-    # Define the directions for adjacent pixels (no diagonals)
-    directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
-    
-    def is_valid(x, y):
-        return 0 <= x < height and 0 <= y < width and image[x, y] > 0
-    
-    def scan_directions(x, y):
-        non_visited_neighbors = []
-        for dx, dy in directions:
-            nx, ny = x + dx, y + dy
-            if is_valid(nx, ny) and (nx, ny) not in visited:
-                non_visited_neighbors.append((nx, ny))
-        return non_visited_neighbors
-
-    def find_polyline(x, y):
-        main_line = [(y, x)]  # Swap x and y here
-        visited.add((x, y))
-        non_visited_neighbors = scan_directions(x, y)
-        number_of_paths = len(non_visited_neighbors)
-
-        # Check if we are at a node
-        if number_of_paths > 1:
-            longest_path = []
-            for neighbor in non_visited_neighbors:
-                nx, ny = neighbor
-                polyline = find_polyline(nx, ny)
-                if len(polyline) > len(longest_path):
-                    longest_path = polyline
-        
-            if longest_path:
-                main_line.extend(longest_path)
-        
-        while number_of_paths == 1:
-            nx, ny = non_visited_neighbors[0]
-            main_line.append((ny, nx))  # Swap x and y here
-            visited.add((nx, ny))
-            non_visited_neighbors = scan_directions(nx, ny)
-            number_of_paths = len(non_visited_neighbors)
-        
-        return main_line
-            
-    # Loop through every pixel in the image
-    for x in range(height):
-        for y in range(width):
-            if image[x, y] > 0 and (x, y) not in visited:
-                polyline = find_polyline(x, y)
-                if len(polyline) > 1:
-                    dwg.add(dwg.polyline(polyline, fill='none', stroke='black', stroke_width=1))
-    
-    # Save the SVG file
-    dwg.save()
 
 ###### MAIN FUNCTIONS ######
 def cleardata():
@@ -522,13 +463,17 @@ def NUMPY_convert_to_SVG2(image, output_path):
         for point in contour:
             x = int(point[0][0])
             y = int(point[0][1])
-            #if (x, y) not in visited_points:
-            points.append((x, y))
-            visited_points.add((x, y))
+            current_point = (x, y)
+            
+            #if current_point not in visited_points:
+            points.append(current_point)
+
+            visited_points.add(current_point)
         
         if closed_contor_calculation(contour) == True:
             points.append(points[0])
 
+        print(points, '\n')
         dwg.add(dwg.polyline(points, fill='none', stroke='black', stroke_width=1))
     
     # Convert the SVG drawing to an XML string
@@ -537,6 +482,67 @@ def NUMPY_convert_to_SVG2(image, output_path):
     # Parse the SVG string
     root = ET.fromstring(svg_string)    
 
+    # Convert the cleaned XML tree back to a string
+    cleaned_svg_string = ET.tostring(root, encoding='unicode')
+
+    # Save the cleaned SVG string to the output file
+    with open(output_path, 'w') as f:
+        f.write(cleaned_svg_string)
+
+def unest_list(points):
+    visited_points = set()
+    result = []
+    current_list = []
+
+    for point in points:
+        if point in visited_points:
+            if current_list:
+                result.append(current_list)
+            current_list = [point]
+            result.append(current_list)
+            current_list = []
+        else:
+            visited_points.add(point)
+            current_list.append(point)
+
+    if current_list:
+        result.append(current_list)
+
+    return result
+
+def loop_calculation(contour):
+    points = [(int(point[0][0]), int(point[0][1])) for point in contour]
+    return unest_list(points)
+
+def NUMPY_convert_to_SVG3(image, output_path):
+    # Skeletonize the binary image to get the centerline
+    skeleton = skeletonize(image // 255)  # Convert to binary (0, 1) for skeletonize
+    
+    # Convert skeleton to 8-bit single-channel image for display
+    skeleton_display = (skeleton * 255).astype(np.uint8)
+
+    # Find contours on the skeletonized image
+    contours, _ = cv2.findContours(skeleton.astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    # Create an SVG drawing
+    height, width = image.shape
+    dwg = Drawing(output_path, profile='tiny', size=(width, height))
+    
+    # Draw contours as polylines
+    for contour in contours:
+
+        points_list = loop_calculation(contour)
+
+        for points in points_list:
+            if closed_contor_calculation(contour) == True:
+                points.append(points[0])
+            dwg.add(dwg.polyline(points, fill='none', stroke='black', stroke_width=1))
+    
+    # Convert the SVG drawing to an XML string
+    svg_string = dwg.tostring()
+    
+    # Parse the SVG string
+    root = ET.fromstring(svg_string)    
 
     # Convert the cleaned XML tree back to a string
     cleaned_svg_string = ET.tostring(root, encoding='unicode')
@@ -617,7 +623,7 @@ if __name__ == '__main__':
     combine_and_plot_masks(groups2)
     items = groups2.items()
     keys = groups2.keys()
-    cv2.imshow('hair',groups2['hair'])
+    cv2.imshow('hair',groups2['eybrows'])
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 

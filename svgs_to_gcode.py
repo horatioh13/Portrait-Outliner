@@ -3,7 +3,7 @@ import xml.etree.ElementTree as ET
 import svgutils.transform as sg
 from svgutils.compose import Unit
 
-pendownzheight = 12.7
+pendownzheight = 11.5
 offset = 4
 
 
