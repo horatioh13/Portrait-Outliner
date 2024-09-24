@@ -25,9 +25,9 @@ remove_model = 'rembg'
 
 apikey = 'dyqhCX5Zx5vRi9r1Hw3uVrky'
 
-imagesource = 'laptopwebcam'
+#imagesource = 'laptopwebcam'
 #imagesource = 'usbwebcam'
-#imagesource = 'thispersondoesnotexist'
+imagesource = 'thispersondoesnotexist'
 #imagesource = 'file'
 
 #edgemode = 'canny'
@@ -473,7 +473,6 @@ def NUMPY_convert_to_SVG2(image, output_path):
         if closed_contor_calculation(contour) == True:
             points.append(points[0])
 
-        print(points, '\n')
         dwg.add(dwg.polyline(points, fill='none', stroke='black', stroke_width=1))
     
     # Convert the SVG drawing to an XML string
@@ -513,43 +512,6 @@ def unest_list(points):
 def loop_calculation(contour):
     points = [(int(point[0][0]), int(point[0][1])) for point in contour]
     return unest_list(points)
-
-def NUMPY_convert_to_SVG3(image, output_path):
-    # Skeletonize the binary image to get the centerline
-    skeleton = skeletonize(image // 255)  # Convert to binary (0, 1) for skeletonize
-    
-    # Convert skeleton to 8-bit single-channel image for display
-    skeleton_display = (skeleton * 255).astype(np.uint8)
-
-    # Find contours on the skeletonized image
-    contours, _ = cv2.findContours(skeleton.astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-    # Create an SVG drawing
-    height, width = image.shape
-    dwg = Drawing(output_path, profile='tiny', size=(width, height))
-    
-    # Draw contours as polylines
-    for contour in contours:
-
-        points_list = loop_calculation(contour)
-
-        for points in points_list:
-            if closed_contor_calculation(contour) == True:
-                points.append(points[0])
-            dwg.add(dwg.polyline(points, fill='none', stroke='black', stroke_width=1))
-    
-    # Convert the SVG drawing to an XML string
-    svg_string = dwg.tostring()
-    
-    # Parse the SVG string
-    root = ET.fromstring(svg_string)    
-
-    # Convert the cleaned XML tree back to a string
-    cleaned_svg_string = ET.tostring(root, encoding='unicode')
-
-    # Save the cleaned SVG string to the output file
-    with open(output_path, 'w') as f:
-        f.write(cleaned_svg_string)
 
 def add_features_from_svg():
     if os.path.isfile(os.path.join('outlines_svg', 'eyes_outline.svg')):
@@ -609,6 +571,100 @@ def init_file_structure():
         if not os.path.exists(dir_path):
             os.makedirs(dir_path)
 
+def set_list_value(lst, index, value):
+    if index >= len(lst):
+        lst.extend([None] * (index + 1 - len(lst)))
+    lst[index] = value
+
+def process_points(points):
+    final_list = []
+    points_buffer_list = []
+    points_target = set(points)
+    mode = 'new'
+    buffer_index = 0
+    traversed_points = set() 
+    if len(points) == len(points_target):
+        return [points]
+    else:
+        for point in points:
+            points_buffer_list.append(point)
+            if point not in traversed_points:
+                traversed_points.add(point)
+                if mode == 'new':
+                    pass
+                elif mode == 'dupe':
+                    #set_list_value(final_list, buffer_index, points_buffer_list)
+                    points_buffer_list = []
+                    #buffer_index += 1
+                    mode = 'new'
+            elif point in traversed_points:
+                if mode == 'dupe':
+                    pass
+                elif mode == 'new':
+                    set_list_value(final_list, buffer_index, points_buffer_list)
+                    points_buffer_list = []
+                    buffer_index += 1
+                    mode = 'dupe'
+    return final_list
+            
+
+def NUMPY_convert_to_SVG3(image, output_path):
+    # Skeletonize the binary image to get the centerline
+    skeleton = skeletonize(image // 255)  # Convert to binary (0, 1) for skeletonize
+    
+    # Convert skeleton to 8-bit single-channel image for display
+    skeleton_display = (skeleton * 255).astype(np.uint8)
+
+    # Find contours on the skeletonized image
+    contours, _ = cv2.findContours(skeleton.astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    # Create an SVG drawing
+    height, width = image.shape
+    dwg = Drawing(output_path, profile='tiny', size=(width, height))
+    
+    # Draw contours as polylines
+    for contour in contours:
+        points = []
+        visited_points = set()
+        for point in contour:
+            x = int(point[0][0])
+            y = int(point[0][1])
+            current_point = (x, y)
+            
+            #if current_point not in visited_points:
+            points.append(current_point)
+
+            visited_points.add(current_point)
+        
+        if closed_contor_calculation(contour) == True:
+            points.append(points[0])
+
+        list_of_list_of_points = process_points(points)
+        for list_of_points in list_of_list_of_points:
+            dwg.add(dwg.polyline(list_of_points, fill='none', stroke='black', stroke_width=1))
+    
+    # Convert the SVG drawing to an XML string
+    svg_string = dwg.tostring()
+    
+    # Parse the SVG string
+    root = ET.fromstring(svg_string)    
+
+    # Convert the cleaned XML tree back to a string
+    cleaned_svg_string = ET.tostring(root, encoding='unicode')
+
+    # Save the cleaned SVG string to the output file
+    with open(output_path, 'w') as f:
+        f.write(cleaned_svg_string)
+
+
+
+
+
+
+
+
+
+
 if __name__ == '__main__':
 
     init_file_structure()
@@ -630,7 +686,7 @@ if __name__ == '__main__':
     for item, key in zip(items, keys):
         if item[1] is not None:
             output_path = os.path.join('outlines_svg', f'{key}_outline.svg')
-            NUMPY_convert_to_SVG2(item[1], output_path)
+            NUMPY_convert_to_SVG3(item[1], output_path)
 
     #add_features_from_svg()
 
