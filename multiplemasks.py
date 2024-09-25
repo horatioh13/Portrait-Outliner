@@ -336,8 +336,9 @@ def process_NUMPY_outlines(groups):
     groups['mouth'] = dilate_and_subtract(groups['mouth'], groups['upper lip'])
     groups['mouth'] = dilate_and_subtract(groups['mouth'], groups['lower lip'])
 
-    #subtracting ears from clothes
+    #subtracting ears and hair from clothes
     groups['clothes'] = dilate_and_subtract(groups['clothes'], groups['ears'])
+    groups['clothes'] = dilate_and_subtract(groups['clothes'], groups['hair'])
 
     #subtracting earings from ears
     groups['ears'] = dilate_and_subtract(groups['ears'], groups['earings'])
@@ -472,7 +473,7 @@ def NUMPY_convert_to_SVG2(image, output_path):
         
         if closed_contor_calculation(contour) == True:
             points.append(points[0])
-
+        print(points)  
         dwg.add(dwg.polyline(points, fill='none', stroke='black', stroke_width=1))
     
     # Convert the SVG drawing to an XML string
@@ -576,7 +577,7 @@ def set_list_value(lst, index, value):
         lst.extend([None] * (index + 1 - len(lst)))
     lst[index] = value
 
-def process_points(points):
+def process_points1(points):
     final_list = []
     points_buffer_list = []
     points_target = set(points)
@@ -587,11 +588,10 @@ def process_points(points):
         return [points]
     else:
         for point in points:
-            points_buffer_list.append(point)
             if point not in traversed_points:
                 traversed_points.add(point)
                 if mode == 'new':
-                    pass
+                    points_buffer_list.append(point)
                 elif mode == 'dupe':
                     #set_list_value(final_list, buffer_index, points_buffer_list)
                     points_buffer_list = []
@@ -605,7 +605,44 @@ def process_points(points):
                     points_buffer_list = []
                     buffer_index += 1
                     mode = 'dupe'
+        if points_buffer_list:
+            set_list_value(final_list, buffer_index, points_buffer_list)
     return final_list
+
+def process_points2(points):
+    final_list = []
+    points_buffer_list = []
+    points_target = set(points)
+    mode = 'new'
+    buffer_index = 0
+    traversed_points = set() 
+    if len(points) == len(points_target):
+        return [points]
+    else:
+        for point in points:
+            if mode == 'new':
+                if point not in traversed_points:
+                    points_buffer_list.append(point)
+                    traversed_points.add(point)
+                elif point in traversed_points:
+                    points_buffer_list.append(point)
+                    set_list_value(final_list, buffer_index, points_buffer_list)
+                    points_buffer_list = []
+                    buffer_index += 1
+                    mode = 'dupe'
+ 
+            elif mode == 'dupe':
+                if point not in traversed_points:
+                    points_buffer_list = []
+                    points_buffer_list.append(points[points.index(point) - 1])
+                    points_buffer_list.append(point)
+                    pass
+                elif point in traversed_points:
+                    pass
+    return final_list
+            
+
+
             
 
 def NUMPY_convert_to_SVG3(image, output_path):
@@ -639,7 +676,7 @@ def NUMPY_convert_to_SVG3(image, output_path):
         if closed_contor_calculation(contour) == True:
             points.append(points[0])
 
-        list_of_list_of_points = process_points(points)
+        list_of_list_of_points = process_points1(points)
         for list_of_points in list_of_list_of_points:
             dwg.add(dwg.polyline(list_of_points, fill='none', stroke='black', stroke_width=1))
     
@@ -658,15 +695,9 @@ def NUMPY_convert_to_SVG3(image, output_path):
 
 
 
-
-
-
-
-
-
-
 if __name__ == '__main__':
 
+    
     init_file_structure()
 
     cleardata()
@@ -674,21 +705,21 @@ if __name__ == '__main__':
     align_and_crop()
 
     segment_face()
+    
     groups = mask_dir_to_NUMPY_arrays() 
     groups2 = process_NUMPY_outlines(groups)
     combine_and_plot_masks(groups2)
     items = groups2.items()
     keys = groups2.keys()
-    cv2.imshow('hair',groups2['eybrows'])
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+
+    
 
     for item, key in zip(items, keys):
         if item[1] is not None:
             output_path = os.path.join('outlines_svg', f'{key}_outline.svg')
-            NUMPY_convert_to_SVG3(item[1], output_path)
-
-    #add_features_from_svg()
+            NUMPY_convert_to_SVG2(item[1], output_path)
+    
+    add_features_from_svg()
 
 
     
