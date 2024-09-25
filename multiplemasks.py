@@ -326,8 +326,9 @@ def process_NUMPY_outlines(groups):
     groups['ears'] = dilate_and_subtract(groups['ears'], groups['hair'])
     groups['ears'] = dilate_and_subtract(groups['ears'], groups['skin'])
 
-    #subtracting glasses from eybrows
+    #subtracting glasses and hat from eybrows
     groups['eybrows'] = dilate_and_subtract(groups['eybrows'], groups['glasses'])
+    groups['eybrows'] = dilate_and_subtract(groups['eybrows'], groups['hat'])
     
     #subtracting glasses from nose
     groups['nose'] = dilate_and_subtract(groups['nose'], groups['glasses'])
@@ -336,12 +337,16 @@ def process_NUMPY_outlines(groups):
     groups['mouth'] = dilate_and_subtract(groups['mouth'], groups['upper lip'])
     groups['mouth'] = dilate_and_subtract(groups['mouth'], groups['lower lip'])
 
-    #subtracting ears and hair from clothes
+    #subtracting ears and hair and earings from clothes
     groups['clothes'] = dilate_and_subtract(groups['clothes'], groups['ears'])
     groups['clothes'] = dilate_and_subtract(groups['clothes'], groups['hair'])
+    groups['clothes'] = dilate_and_subtract(groups['clothes'], groups['earings'])
 
     #subtracting earings from ears
     groups['ears'] = dilate_and_subtract(groups['ears'], groups['earings'])
+
+
+
 
 
     return groups
@@ -636,15 +641,15 @@ def process_points2(points):
                     points_buffer_list = []
                     points_buffer_list.append(points[points.index(point) - 1])
                     points_buffer_list.append(point)
-                    pass
+                    buffer_index += 1
+                    mode = 'new'
                 elif point in traversed_points:
                     pass
+
+        if points_buffer_list:
+            set_list_value(final_list, buffer_index, points_buffer_list)
     return final_list
             
-
-
-            
-
 def NUMPY_convert_to_SVG3(image, output_path):
     # Skeletonize the binary image to get the centerline
     skeleton = skeletonize(image // 255)  # Convert to binary (0, 1) for skeletonize
@@ -676,9 +681,10 @@ def NUMPY_convert_to_SVG3(image, output_path):
         if closed_contor_calculation(contour) == True:
             points.append(points[0])
 
-        list_of_list_of_points = process_points1(points)
+        list_of_list_of_points = process_points2(points)
         for list_of_points in list_of_list_of_points:
-            dwg.add(dwg.polyline(list_of_points, fill='none', stroke='black', stroke_width=1))
+            if list_of_points:
+                dwg.add(dwg.polyline(list_of_points, fill='none', stroke='black', stroke_width=1))
     
     # Convert the SVG drawing to an XML string
     svg_string = dwg.tostring()
@@ -717,7 +723,7 @@ if __name__ == '__main__':
     for item, key in zip(items, keys):
         if item[1] is not None:
             output_path = os.path.join('outlines_svg', f'{key}_outline.svg')
-            NUMPY_convert_to_SVG2(item[1], output_path)
+            NUMPY_convert_to_SVG3(item[1], output_path)
     
     add_features_from_svg()
 
