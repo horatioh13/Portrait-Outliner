@@ -15,11 +15,13 @@ fastjsonschema==2.20.0
 filelock==3.16.0
 flatbuffers==24.3.25
 fsspec==2024.9.0
+future==1.0.0
 glasses-detector==1.0.1
 humanfriendly==10.0
 idna==3.8
 imageio==2.35.1
 ipython==8.12.3
+iso8601==2.1.0
 jedi==0.19.1
 Jinja2==3.1.4
 jsonschema==4.23.0
@@ -71,7 +73,9 @@ ptyprocess==0.7.0
 pure_eval==0.2.3
 Pygments==2.18.0
 PyMatting==1.1.12
+pyserial==3.5
 python-dateutil==2.9.0.post0
+PyYAML==6.0.2
 pyzmq==26.2.0
 rdp==0.8
 referencing==0.35.1
@@ -80,6 +84,7 @@ requests==2.32.3
 rpds-py==0.20.0
 scikit-image==0.24.0
 scipy==1.14.1
+serial==0.0.97
 setuptools==75.1.0
 shapely==2.0.6
 six==1.16.0
