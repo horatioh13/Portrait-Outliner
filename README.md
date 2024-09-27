@@ -8,7 +8,7 @@ In run_everything.py, the calibration settings for pendown and pen offset height
 
 I used https://github.com/AndrewSink/pltr_toolhead for the pen plotter, and https://github.com/ShyBoy233/PyGcodeSender to send gcode to my printer over a serial connection. 
 
-credit to: https://github.com/mantasu/face-crop-plus,https://github.com/biubug6/Pytorch_Retinaface,https://github.com/cszn/BSRGAN, and https://github.com/zllrunning/face-parsing.PyTorch, for the AI facial segmentation algorithms.
+credit to: https://github.com/mantasu/face-crop-plus, https://github.com/biubug6/Pytorch_Retinaface, https://github.com/cszn/BSRGAN, and https://github.com/zllrunning/face-parsing.PyTorch, for the AI facial segmentation algorithms.
 
 
 
