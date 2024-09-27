@@ -25,7 +25,7 @@ remove_model = 'rembg'
 
 apikey = 'dyqhCX5Zx5vRi9r1Hw3uVrky'
 
-imagesource = 'laptopwebcam'
+#imagesource = 'laptopwebcam'
 #imagesource = 'usbwebcam'
 #imagesource = 'thispersondoesnotexist'
 #imagesource = 'file'
@@ -240,8 +240,6 @@ def cleardata():
             if os.path.isfile(file_path) or os.path.islink(file_path):
                 os.remove(file_path)
     
-
-
 def get_image_from_source():
     if imagesource == 'thispersondoesnotexist':
         image_url = 'https://thispersondoesnotexist.com'
@@ -709,7 +707,9 @@ def NUMPY_convert_to_SVG3(image, output_path):
     with open(output_path, 'w') as f:
         f.write(cleaned_svg_string)
 
-def run_all():
+def run_all(image_source):
+    global imagesource
+    imagesource = image_source
     init_file_structure()
 
     cleardata()
@@ -734,7 +734,7 @@ def run_all():
     add_features_from_svg()
 
 if __name__ == '__main__':
-    run_all()
+    run_all(image_source='laptopwebcam')
 
 
 
