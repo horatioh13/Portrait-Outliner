@@ -6,7 +6,4 @@ cropped_image/
 __pycache__/
 combined_output.svg
 output51.gcode
-PyGcodeSender/.gitignore
-PyGcodeSender/__pycache__/
-PyGcodeSender/PyGcodeSender.Py
-PyGcodeSender/README.md
+
