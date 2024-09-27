@@ -6,4 +6,5 @@ cropped_image/
 __pycache__/
 combined_output.svg
 output51.gcode
+pyGcodeSender.py
 
