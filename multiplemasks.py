@@ -25,9 +25,9 @@ remove_model = 'rembg'
 
 apikey = 'dyqhCX5Zx5vRi9r1Hw3uVrky'
 
-#imagesource = 'laptopwebcam'
+imagesource = 'laptopwebcam'
 #imagesource = 'usbwebcam'
-imagesource = 'thispersondoesnotexist'
+#imagesource = 'thispersondoesnotexist'
 #imagesource = 'file'
 
 #edgemode = 'canny'
@@ -231,6 +231,16 @@ def cleardata():
                     os.remove(file_path)
                 elif os.path.isdir(file_path):
                     shutil.rmtree(file_path)
+
+    # Remove .gcode and .svg files from the base directory
+    base_dir = os.getcwd()
+    for file in os.listdir(base_dir):
+        if file.endswith('.gcode') or file.endswith('.svg'):
+            file_path = os.path.join(base_dir, file)
+            if os.path.isfile(file_path) or os.path.islink(file_path):
+                os.remove(file_path)
+    
+
 
 def get_image_from_source():
     if imagesource == 'thispersondoesnotexist':
@@ -699,11 +709,7 @@ def NUMPY_convert_to_SVG3(image, output_path):
     with open(output_path, 'w') as f:
         f.write(cleaned_svg_string)
 
-
-
-if __name__ == '__main__':
-
-    
+def run_all():
     init_file_structure()
 
     cleardata()
@@ -727,8 +733,11 @@ if __name__ == '__main__':
     
     add_features_from_svg()
 
+if __name__ == '__main__':
+    run_all()
 
-    
+
+
 
     
 

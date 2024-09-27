@@ -3,13 +3,6 @@ import xml.etree.ElementTree as ET
 import svgutils.transform as sg
 from svgutils.compose import Unit
 
-pendownzheight = 11.5
-offset = 4
-
-
-penupzheight = pendownzheight + offset
-
-
 def parse_svg(svg_path):
     tree = ET.parse(svg_path)
     root = tree.getroot()
@@ -23,7 +16,8 @@ def parse_svg(svg_path):
     
     return paths
 
-def generate_gcode(paths):
+def generate_gcode(paths,pendownzheight,offset):
+    penupzheight = pendownzheight + offset
     gcode = []
     gcode.append("G21 ; Set units to millimeters")
     gcode.append("G90 ; Use absolute positioning")
@@ -66,10 +60,10 @@ def scale_paths(paths):
     
     return scaled_paths
 
-def svg_to_gcode(svg_path, output_path):
+def svg_to_gcode(svg_path, output_path,pendownzheight,offset):
     paths = parse_svg(svg_path)
     scaled_paths = scale_paths(paths)
-    gcode = generate_gcode(scaled_paths)
+    gcode = generate_gcode(scaled_paths,pendownzheight,offset)
     
     with open(output_path, 'w') as f:
         f.write(gcode)
@@ -90,7 +84,10 @@ def combine_svgs(input_dir, output_svg_path):
     tree = ET.ElementTree(combined_svg)
     tree.write(output_svg_path)
 
-# Example usage
-if __name__ == '__main__':
+def run_all(pendownzheight,offset):
     combine_svgs('outlines_svg', 'combined_output.svg')
-    svg_to_gcode('combined_output.svg','output51.gcode')
+    svg_to_gcode('combined_output.svg','output51.gcode',pendownzheight,offset)
+
+if __name__ == '__main__':
+    run_all(pendownzheight = 14.5 , offset = 4)
+    
