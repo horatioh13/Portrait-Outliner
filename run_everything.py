@@ -3,9 +3,17 @@ import svgs_to_gcode
 import os
 import subprocess
 
-multiplemasks.run_all('laptopwebcam')
-svgs_to_gcode.run_all(pendownzheight=9.8,offset=4)
+def run_all(image_source):
+    multiplemasks.run_all(image_source)
+    svgs_to_gcode.run_all(pendownzheight=17,offset=4)
 
-#command = "pyGcodeSender.py output51.gcode"
 
-#subprocess.run(command, shell=True)
+if __name__ == '__main__':
+    multiplemasks.run_all('file')
+    svgs_to_gcode.run_all(pendownzheight=17,offset=4)
+
+    command = "python3 pyGcodeSender.py output51.gcode"
+
+    subprocess.run(command, shell=True)
+
+

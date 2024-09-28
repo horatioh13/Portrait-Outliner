@@ -7,4 +7,6 @@ __pycache__/
 combined_output.svg
 output51.gcode
 pyGcodeSender.py
+templates/
+app.py
 

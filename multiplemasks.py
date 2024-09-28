@@ -353,10 +353,6 @@ def process_NUMPY_outlines(groups):
     #subtracting earings from ears
     groups['ears'] = dilate_and_subtract(groups['ears'], groups['earings'])
 
-
-
-
-
     return groups
 
 def distance(p1, p2):
@@ -714,6 +710,7 @@ def run_all(image_source):
 
     cleardata()
     get_image_from_source()
+    remove_background('original_image/image1.png', 'original_image/image1.png')
     align_and_crop()
 
     segment_face()
