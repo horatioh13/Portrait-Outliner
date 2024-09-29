@@ -1,3 +1,11 @@
+
+![IMG_7143](https://github.com/user-attachments/assets/bf7919b1-8231-47a2-beb9-9acc666d06c1)
+![IMG_7134](https://github.com/user-attachments/assets/d8299bb3-1972-426d-9bca-eac0ee84f003)
+![IMG_7122](https://github.com/user-attachments/assets/471f4930-0a1c-4066-8028-8b24ac9755e9)
+
+
+
+
 This application takes a picture of a person, and converts the outlines of the picture into scaled Gcode for use on pen plotter or 3d printer with pen plotter attachment.
 
 The image source is specified at the top of multiplemasks.py, you can pull images from your laptop webcam, a usb webcam, a file, or the website thispersondoesnotexist.com.
