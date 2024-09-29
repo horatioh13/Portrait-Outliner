@@ -1,9 +1,8 @@
-
-![IMG_7143](https://github.com/user-attachments/assets/bf7919b1-8231-47a2-beb9-9acc666d06c1)
-![IMG_7134](https://github.com/user-attachments/assets/d8299bb3-1972-426d-9bca-eac0ee84f003)
-![IMG_7122](https://github.com/user-attachments/assets/471f4930-0a1c-4066-8028-8b24ac9755e9)
-
-
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/bf7919b1-8231-47a2-beb9-9acc666d06c1" alt="IMG_7143" width="30%" />
+  <img src="https://github.com/user-attachments/assets/d8299bb3-1972-426d-9bca-eac0ee84f003" alt="IMG_7134" width="30%" />
+  <img src="https://github.com/user-attachments/assets/471f4930-0a1c-4066-8028-8b24ac9755e9" alt="IMG_7122" width="30%" />
+</p>
 
 
 This application takes a picture of a person, and converts the outlines of the picture into scaled Gcode for use on pen plotter or 3d printer with pen plotter attachment.
