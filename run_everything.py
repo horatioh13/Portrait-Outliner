@@ -9,7 +9,7 @@ def run_all(image_source):
 
 
 if __name__ == '__main__':
-    multiplemasks.run_all('file')
+    multiplemasks.run_all('thispersondoesnotexist')
     svgs_to_gcode.run_all(pendownzheight=17,offset=4)
 
     command = "python3 pyGcodeSender.py output51.gcode"
