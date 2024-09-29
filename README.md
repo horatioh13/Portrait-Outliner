@@ -1,3 +1,8 @@
+# [Portrait Drawing Robot]([https://your-project-url.com](https://github.com/horatioh13/drawing_robot/))
+
+![Python](https://img.shields.io/badge/python-3.12-blue)
+![OS](https://img.shields.io/badge/os-linux-green)
+
 <p align="center">
   <img src="https://github.com/user-attachments/assets/bf7919b1-8231-47a2-beb9-9acc666d06c1" alt="IMG_7143" width="30%" />
   <img src="https://github.com/user-attachments/assets/d8299bb3-1972-426d-9bca-eac0ee84f003" alt="IMG_7134" width="30%" />
