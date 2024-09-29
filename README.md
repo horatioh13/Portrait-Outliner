@@ -47,6 +47,9 @@ I used [Pltr Toolhead V2](https://github.com/AndrewSink/pltr_toolhead) for the p
 
 This package uses the code from the following repositories:
 * [Face Crop Plus](https://github.com/mantasu/face-crop-plus) - Image preprocessing package for automatic face alignment and cropping with additional features.
+* [rembg](https://github.com/danielgatis/rembg) - Rembg is a tool to remove images background.
+
+
 
 
 
