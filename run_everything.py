@@ -12,8 +12,8 @@ if __name__ == '__main__':
     multiplemasks.run_all('thispersondoesnotexist')
     svgs_to_gcode.run_all(pendownzheight=17,offset=4)
 
-    command = "python3 pyGcodeSender.py output51.gcode"
+    #command = "python3 pyGcodeSender.py output51.gcode"
 
-    subprocess.run(command, shell=True)
+    #subprocess.run(command, shell=True)
 
 
