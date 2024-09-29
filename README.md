@@ -12,7 +12,28 @@
 
 This application takes a picture of a person, and converts the outlines of the picture into scaled Gcode for use on pen plotter or 3d printer with pen plotter attachment.
 
-The image source is specified as an input to the multiple masks function in run_everything.py. Possible image sources include: "laptopwebcam", "usbwebcam", "file", or "thispersondoesnotexist".
+## Installation
+Create and activate a virtual environment:
+```bash
+python3.12 -m venv .venv
+source .venv/bin/activate
+```
+Clone repository
+```bash
+git clone https://github.com/horatioh13/Portrait-Draw.git
+```
+Install requirements
+```bash
+pip install -r requirements.txt
+```
+
+## Usage
+Run default script by pulling image from thispersondoesnotexist.com 
+```bash
+python3 run_everything.py
+```
+
+To change the image source, edit the run_everything.py file. Possible image sources include: "laptopwebcam", "usbwebcam", "file", or "thispersondoesnotexist".
 
 Images are 256x256 default size, and scaling and nudge can be specified in svgs_to_gcode.py, to position the portrait in the center of the bed.
 
