@@ -1,7 +1,12 @@
-# [Portrait Drawing Robot]([https://your-project-url.com](https://github.com/horatioh13/drawing_robot/))
+<h1 style="text-align: center;">
+    <a href="https://github.com/horatioh13/Portrait-Draw/">Portrait Draw</a>
+</h1>
 
-![Python](https://img.shields.io/badge/python-3.12-blue)
-![OS](https://img.shields.io/badge/os-linux-green)
+<p align="center">
+    <img src="https://img.shields.io/badge/python-3.12-blue" alt="Python">
+    <img src="https://img.shields.io/badge/os-linux-green" alt="OS">
+</p>
+
 
 <p align="center">
   <img src="https://github.com/user-attachments/assets/bf7919b1-8231-47a2-beb9-9acc666d06c1" alt="IMG_7143" width="30%" />
