@@ -23,7 +23,7 @@ from svgs_to_gcode import parse_svg
 remove_model = 'rembg'
 #remove_model = 'removebg'
 
-apikey = 'dyqhCX5Zx5vRi9r1Hw3uVrky'
+apikey = 'insert api key here'
 
 #imagesource = 'laptopwebcam'
 #imagesource = 'usbwebcam'
