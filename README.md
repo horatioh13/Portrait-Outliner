@@ -32,12 +32,23 @@ Run default script by pulling image from thispersondoesnotexist.com
 ```bash
 python3 run_everything.py
 ```
+## Features
 
-To change the image source, edit the run_everything.py file. Possible image sources include: "laptopwebcam", "usbwebcam", "file", or "thispersondoesnotexist".
+This project provides a variety of command line arguments to customize the behavior of the drawing robot script. Below is a list of available arguments and their purpose:
 
-Images are 256x256 default size, and scaling and nudge can be specified in svgs_to_gcode.py, to position the portrait in the center of the bed.
+| Argument           | Type    | Default                        | Description                                 |
+|--------------------|---------|--------------------------------|---------------------------------------------|
+| `--image_source`   | `str`   | `thispersondoesnotexist`     | Specifies the source of the image to be used. Other options include: `laptopwebcam`, `usbwebcam`, or `file`. |
+| `--plot_bitmaps`   | `bool`  | `False`                        | Boolean flag to indicate whether to display bitmaps in OpenCV window before generating SVGs. |
+| `--pendownzheight` | `float` | `14.5`                         | Sets the Z height when the pen is down.     |
+| `--offset`         | `float` | `4`                            | Specifies the zhop value.                   |
+| `--scalingfactor`  | `float` | `0.586`                        | Determines the scaling factor for the image. Default size is 256x256mm. |
+| `--nudgexy`        | `float` | `42.5`                         | Sets the nudge XY value. Nudge XY units are in mm. Best combined with a scaling factor to position image in center of drawing bed. |
+| `--gcode_file`     | `str`   | `None`                         | Specifies the G-code file to be sent over serial. Only works when PyGcodeSender.py is in the file. |
 
-In run_everything.py, the calibration settings for pendown and pen offset height are set.
+These arguments allow for fine-tuning various parameters to better suit your specific needs when running the drawing robot script.
+
+
 
 ## Hardware
 I used [Pltr Toolhead V2](https://github.com/AndrewSink/pltr_toolhead) for the pen plotter, and [PyGcodeSender](https://github.com/ShyBoy233/PyGcodeSender) to send gcode to my printer over a serial connection. 
