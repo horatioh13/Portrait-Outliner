@@ -5,7 +5,7 @@ masks/
 cropped_image/
 __pycache__/
 combined_output.svg
-output51.gcode
+output.gcode
 pyGcodeSender.py
 templates/
 app.py

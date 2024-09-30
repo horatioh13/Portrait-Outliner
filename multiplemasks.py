@@ -708,7 +708,7 @@ def run_all(image_source,plot_bitmaps):
 
     cleardata()
     get_image_from_source()
-    remove_background('original_image/image1.png', 'original_image/image1.png')
+    #remove_background('original_image/image1.png', 'original_image/image1.png')
     align_and_crop()
 
     segment_face()
