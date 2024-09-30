@@ -55,7 +55,7 @@ I used [Pltr Toolhead V2](https://github.com/AndrewSink/pltr_toolhead) for the p
 
 https://github.com/user-attachments/assets/70344170-36a1-4fbf-b9ee-893f828de9ab
 
-## Photographs
+## Example Photographs
 <p align="center">
   <img src="https://github.com/user-attachments/assets/bf7919b1-8231-47a2-beb9-9acc666d06c1" alt="IMG_7143" width="30%" />
   <img src="https://github.com/user-attachments/assets/d8299bb3-1972-426d-9bca-eac0ee84f003" alt="IMG_7134" width="30%" />
