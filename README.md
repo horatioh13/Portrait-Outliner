@@ -28,6 +28,10 @@ Run default script by pulling image from thispersondoesnotexist.com
 ```bash
 python3 run_everything.py
 ```
+If you get a libGL.so.1 error, try:
+```bash
+sudo apt update && sudo apt install libgl1
+```
 ## Features
 
 This project provides a variety of command line arguments to customize the behavior of the drawing robot script. Below is a list of available arguments and their purpose:
