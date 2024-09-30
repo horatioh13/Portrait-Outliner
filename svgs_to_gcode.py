@@ -89,7 +89,7 @@ def run_all(pendownzheight,offset,scalingfactor,nudgexy):
     nudge_xy = nudgexy
 
     combine_svgs('outlines_svg', 'combined_output.svg')
-    svg_to_gcode('combined_output.svg','output51.gcode',pendownzheight,offset)
+    svg_to_gcode('combined_output.svg','output.gcode',pendownzheight,offset)
 
 if __name__ == '__main__':
     run_all(pendownzheight = 14.5 , offset = 4, scalingfactor = .586, nudgexy = 42.5)
