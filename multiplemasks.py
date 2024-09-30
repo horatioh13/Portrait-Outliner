@@ -23,19 +23,14 @@ from svgs_to_gcode import parse_svg
 remove_model = 'rembg'
 #remove_model = 'removebg'
 
-apikey = 'insert api key here'
+apikey = 'insert API key here'
 
 #imagesource = 'laptopwebcam'
 #imagesource = 'usbwebcam'
 #imagesource = 'thispersondoesnotexist'
 #imagesource = 'file'
 
-#edgemode = 'canny'
-edgemode = 'multiplemasks'
-
 ############################################
-
-#old/obsolete functions
 
 def remove_background(input_path,output_path):
     if remove_model == 'rembg':
@@ -160,9 +155,10 @@ def combine_and_plot_masks(masks_dict):
 
     if combined_mask is not None:
         # Display the combined mask using OpenCV
-        cv2.imshow('Combined Mask', combined_mask)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
+        if plotbitmaps is True:
+            cv2.imshow('Combined Mask', combined_mask)
+            cv2.waitKey(0)
+            cv2.destroyAllWindows()
     else:
         print("No masks provided.")
 
@@ -703,9 +699,11 @@ def NUMPY_convert_to_SVG3(image, output_path):
     with open(output_path, 'w') as f:
         f.write(cleaned_svg_string)
 
-def run_all(image_source):
+def run_all(image_source,plot_bitmaps):
     global imagesource
+    global plotbitmaps
     imagesource = image_source
+    plotbitmaps = plot_bitmaps
     init_file_structure()
 
     cleardata()
@@ -731,7 +729,7 @@ def run_all(image_source):
     add_features_from_svg()
 
 if __name__ == '__main__':
-    run_all(image_source='laptopwebcam')
+    run_all(image_source='thispersondoesnotexist',plot_bitmaps=False)
 
 
 

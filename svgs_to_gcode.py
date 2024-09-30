@@ -52,10 +52,8 @@ def generate_gcode(paths,pendownzheight,offset):
 
 def scale_paths(paths):
     scaled_paths = []
-    scaling_factor = 150/256
-    nudgexy = 42.5
     for path in paths:
-        scaled_path = [(x *scaling_factor + nudgexy, y * scaling_factor + nudgexy) for x, y in path]
+        scaled_path = [(x *scaling_factor + nudge_xy, y * scaling_factor + nudge_xy) for x, y in path]
         scaled_paths.append(scaled_path)
     
     return scaled_paths
@@ -84,10 +82,15 @@ def combine_svgs(input_dir, output_svg_path):
     tree = ET.ElementTree(combined_svg)
     tree.write(output_svg_path)
 
-def run_all(pendownzheight,offset):
+def run_all(pendownzheight,offset,scalingfactor,nudgexy):
+    global scaling_factor
+    global nudge_xy
+    scaling_factor = scalingfactor
+    nudge_xy = nudgexy
+
     combine_svgs('outlines_svg', 'combined_output.svg')
     svg_to_gcode('combined_output.svg','output51.gcode',pendownzheight,offset)
 
 if __name__ == '__main__':
-    run_all(pendownzheight = 14.5 , offset = 4)
+    run_all(pendownzheight = 14.5 , offset = 4, scalingfactor = .586, nudgexy = 42.5)
     
