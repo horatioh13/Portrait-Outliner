@@ -1,4 +1,4 @@
-# Portrait Drawing Robot
+# Portrait Outliner
 
 <img src="https://img.shields.io/badge/python-3.12-blue" alt="Python">  <img src="https://img.shields.io/badge/os-linux-green" alt="OS">
 
