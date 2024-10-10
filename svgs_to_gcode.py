@@ -16,13 +16,14 @@ def parse_svg(svg_path):
     
     return paths
 
-def generate_gcode(paths,pendownzheight,offset):
+def generate_gcode(paths,pendownzheight,offset,speed):
+    speed_gcode = f"F{speed}"
     penupzheight = pendownzheight + offset
     gcode = []
     gcode.append("G21 ; Set units to millimeters")
     gcode.append("G90 ; Use absolute positioning")
     gcode.append("G28 ; Home all axes")
-    gcode.append(f"G0 Z{penupzheight} F3000 ; Lift pen")
+    gcode.append(f"G0 Z{penupzheight} {speed_gcode} ; Lift pen")
 
     for path in paths:
         if not path:
@@ -31,21 +32,21 @@ def generate_gcode(paths,pendownzheight,offset):
         # Move to the start of the path
         start_x, start_y = path[0]
 
-        gcode.append(f"G0 X{start_x} Y{start_y} F3000 ; Move to start of path")
-        gcode.append(f"G0 Z{pendownzheight} F3000 ; Lower pen to start drawing")
+        gcode.append(f"G0 X{start_x} Y{start_y} {speed_gcode} ; Move to start of path")
+        gcode.append(f"G0 Z{pendownzheight} {speed_gcode} ; Lower pen to start drawing")
 
         # Draw the path
         for x, y in path[1:]:
-            gcode.append(f"G0 X{x} Y{y} F3000")
+            gcode.append(f"G0 X{x} Y{y} {speed_gcode}")
         
         # Lift the pen after drawing the path
         gcode.append('G91')
-        gcode.append(f'G0 Z{offset} F3000 ; Lift pen')
+        gcode.append(f'G0 Z{offset} {speed_gcode} ; Lift pen')
         gcode.append('G90')
         
     # Ensure the pen is lifted before moving to the home position
-    gcode.append(f"G0 Z{penupzheight} F3000 ; Lift pen")
-    gcode.append("G0 X0 Y0 F3000 ; Move to home position")
+    gcode.append(f"G0 Z{penupzheight} {speed_gcode} ; Lift pen")
+    gcode.append("G0 X0 Y0 {speed_gcode} ; Move to home position")
     gcode.append("M84 ; Disable motors")
 
     return "\n".join(gcode)
@@ -58,10 +59,10 @@ def scale_paths(paths):
     
     return scaled_paths
 
-def svg_to_gcode(svg_path, output_path,pendownzheight,offset):
+def svg_to_gcode(svg_path, output_path,pendownzheight,offset,speed):
     paths = parse_svg(svg_path)
     scaled_paths = scale_paths(paths)
-    gcode = generate_gcode(scaled_paths,pendownzheight,offset)
+    gcode = generate_gcode(scaled_paths,pendownzheight,offset,speed)
     
     with open(output_path, 'w') as f:
         f.write(gcode)
@@ -82,15 +83,15 @@ def combine_svgs(input_dir, output_svg_path):
     tree = ET.ElementTree(combined_svg)
     tree.write(output_svg_path)
 
-def run_all(pendownzheight,offset,scalingfactor,nudgexy):
+def run_all(pendownzheight,offset,scalingfactor,nudgexy,speed):
     global scaling_factor
     global nudge_xy
     scaling_factor = scalingfactor
     nudge_xy = nudgexy
 
     combine_svgs('outlines_svg', 'combined_output.svg')
-    svg_to_gcode('combined_output.svg','output.gcode',pendownzheight,offset)
+    svg_to_gcode('combined_output.svg','output.gcode',pendownzheight,offset,speed)
 
 if __name__ == '__main__':
-    run_all(pendownzheight = 14.5 , offset = 4, scalingfactor = .586, nudgexy = 42.5)
+    run_all(pendownzheight = 14.5 , offset = 4, scalingfactor = .586, nudgexy = 42.5,speed = 3000)
     

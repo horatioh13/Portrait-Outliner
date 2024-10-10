@@ -4,9 +4,9 @@ import os
 import subprocess
 import argparse
 
-def run_all(image_source, plot_bitmaps, pendownzheight, offset, scalingfactor, nudgexy, gcode_file):
+def run_all(image_source, plot_bitmaps, pendownzheight, offset, scalingfactor, nudgexy, gcode_file,speed):
     multiplemasks.run_all(image_source=image_source, plot_bitmaps=plot_bitmaps)
-    svgs_to_gcode.run_all(pendownzheight=pendownzheight, offset=offset, scalingfactor=scalingfactor, nudgexy=nudgexy)
+    svgs_to_gcode.run_all(pendownzheight=pendownzheight, offset=offset, scalingfactor=scalingfactor, nudgexy=nudgexy,speed=speed)
 
     if gcode_file is not None:
         command = f"python3 pyGcodeSender.py {gcode_file}"
@@ -21,8 +21,9 @@ if __name__ == '__main__':
     parser.add_argument('--scalingfactor', type=float, default=0.586, help='Scaling factor')
     parser.add_argument('--nudgexy', type=float, default=42.5, help='Nudge XY value')
     parser.add_argument('--gcode_file', type=str, default=None, help='G-code file to send')
+    parser.add_argument('--speed', type=int, default=3000, help='Speed of gcode movements in mm/min')
     args = parser.parse_args()
 
-    run_all(args.image_source, args.plot_bitmaps, args.pendownzheight, args.offset, args.scalingfactor, args.nudgexy, args.gcode_file)
+    run_all(args.image_source, args.plot_bitmaps, args.pendownzheight, args.offset, args.scalingfactor, args.nudgexy, args.gcode_file, args.speed)
 
 
