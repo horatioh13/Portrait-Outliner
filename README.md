@@ -45,6 +45,8 @@ This project provides a variety of command line arguments to customize the behav
 | `--scalingfactor`  | `float` | `0.586`                        | Determines the scaling factor for the image. Default size is 256x256mm. |
 | `--nudgexy`        | `float` | `42.5`                         | Sets the nudge XY value. Nudge XY units are in mm. Best combined with a scaling factor to position image in center of drawing bed. |
 | `--gcode_file`     | `str`   | `None`                         | Specifies the G-code file to be sent over serial. Only works when PyGcodeSender.py is in the file. |
+| `--speed`     | `float`   | `3000`                         | Specifies the speed that the robot moves at in mm/min |
+
 
 These arguments allow for fine-tuning various parameters to better suit your specific needs when running the drawing robot script.
 
