@@ -3,8 +3,9 @@
 <img src="https://img.shields.io/badge/python-3.12-blue" alt="Python">  <img src="https://img.shields.io/badge/os-linux-green" alt="OS">
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/99ef2524-6053-44d8-b7c0-72947e4d60ce" alt="Explanatory Graphic" width="70%" />
+  <img src="https://github.com/user-attachments/assets/64851688-6e42-424f-a3fe-8c01208044a9" alt="Explanatory Graphic" width="70%" />
 </p>
+
 
 This application takes a picture of a person, and converts the outlines of the picture into scaled Gcode for use on pen plotter or 3d printer with pen plotter attachment.
 
