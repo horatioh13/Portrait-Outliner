@@ -268,6 +268,8 @@ def get_image_from_source():
     
     elif imagesource == 'file':
         image1 = 'original_image/image1.png'
+    else:
+        print('Invalid image source.')
 
 def align_and_crop():
     cropper = Cropper(strategy="largest",face_factor=.7)
