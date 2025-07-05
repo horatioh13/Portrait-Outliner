@@ -58,15 +58,19 @@ python3 run_everything.py --image_source laptopwebcam --pendownzheight 10.2 --of
 
 
 ## Hardware
-I used [Pltr Toolhead V2](https://github.com/AndrewSink/pltr_toolhead) for the pen plotter, and [PyGcodeSender](https://github.com/ShyBoy233/PyGcodeSender) to send gcode to my printer over a serial connection. 
+<p align="center">
+  <video width="30%" controls>
+    <source src="examples/examplevideo.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+</p>
 
-https://github.com/user-attachments/assets/70344170-36a1-4fbf-b9ee-893f828de9ab
 
 ## Example Photographs
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/bf7919b1-8231-47a2-beb9-9acc666d06c1" alt="IMG_7143" width="30%" />
-  <img src="https://github.com/user-attachments/assets/d8299bb3-1972-426d-9bca-eac0ee84f003" alt="IMG_7134" width="30%" />
-  <img src="https://github.com/user-attachments/assets/471f4930-0a1c-4066-8028-8b24ac9755e9" alt="IMG_7122" width="30%" />
+  <img src="examples/img1.png" alt="IMG_7143" width="30%" />
+  <img src="examples/img2.png" alt="IMG_7134" width="30%" />
+  <img src="examples/img3.png" alt="IMG_7122" width="30%" />
 </p>
 
 
