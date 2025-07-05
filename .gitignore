@@ -9,4 +9,5 @@ output.gcode
 pyGcodeSender.py
 templates/
 app.py
+.gitignore
 

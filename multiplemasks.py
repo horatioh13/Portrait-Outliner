@@ -731,7 +731,7 @@ def run_all(image_source,plot_bitmaps):
     add_features_from_svg()
 
 if __name__ == '__main__':
-    run_all(image_source='thispersondoesnotexist',plot_bitmaps=False)
+    run_all(image_source='laptopwebcam',plot_bitmaps=False)
 
 
 

@@ -3,7 +3,7 @@
 <img src="https://img.shields.io/badge/python-3.12-blue" alt="Python">  <img src="https://img.shields.io/badge/os-linux-green" alt="OS">
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/64851688-6e42-424f-a3fe-8c01208044a9" alt="Explanatory Graphic" width="70%" />
+  <img src="examples/explanitory_graphic.png" alt="Explanatory Graphic" width="70%" />
 </p>
 
 
