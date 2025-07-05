@@ -58,6 +58,8 @@ python3 run_everything.py --image_source laptopwebcam --pendownzheight 10.2 --of
 
 
 ## Hardware
+I used [Pltr Toolhead V2](https://github.com/AndrewSink/pltr_toolhead) for the pen plotter, and [PyGcodeSender](https://github.com/ShyBoy233/PyGcodeSender) to send gcode to my printer over a serial connection. 
+
 <p align="center">
   <video width="30%" controls>
     <source src="examples/examplevideo.mp4" type="video/mp4">
